@@ -7,10 +7,10 @@ This plugin finds those rule files and gives them to the model the way each tool
 ## Install
 
 ```sh
-dsh plugin --profile tui add dsh-load-agent-rules
+dsh plugin --profile web add dsh-load-agent-rules
 ```
 
-Use your own profile name in place of `tui`. It starts working in the next session. Remove it with `dsh plugin --profile tui remove dsh-load-agent-rules`.
+That's the `web` profile, the browser UI you start with `dsh web`. If you run DSH another way, use `headless` (scripts and CI) or `acp` (editor integrations) instead. Each profile keeps its own plugin list, so add it to every profile you use. It starts working in the next session. Remove it with `dsh plugin --profile web remove dsh-load-agent-rules`.
 
 ### From a clone
 
@@ -21,7 +21,7 @@ git clone https://github.com/acus9345/dsh-load-agent-rules
 cd dsh-load-agent-rules
 npm install
 npm pack
-dsh plugin --profile tui add ./dsh-load-agent-rules-0.1.0.tgz
+dsh plugin --profile web add ./dsh-load-agent-rules-0.1.0.tgz
 ```
 
 ## Which files it reads
