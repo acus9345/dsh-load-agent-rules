@@ -1,0 +1,12 @@
+# dsh-load-agent-rules: load Cursor / Copilot / Windsurf / Cline / Kiro / Roo / Gemini rules.
+# Override by restating this row's whole `config` in a later layer:
+#
+# - id: load-agent-rules
+#   config:
+#     sources: [cursor, copilot, windsurf, cline, kiro, roo, gemini, junie]
+#     maxBaselineBytes: 48000
+#     maxAttachBytes: 24000
+#     toolName: project_rule      # '' to not register the reader tool
+- insert:
+    - id: load-agent-rules
+      name: dsh-load-agent-rules
