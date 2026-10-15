@@ -77,4 +77,6 @@ npm test           # discovery and rendering unit tests
 npm run test:e2e   # real dsh runs against a scripted local model, no API key needed
 ```
 
+The install test runs `dsh plugin add`, which needs `pnpm` on your PATH.
+
 MIT licensed.
