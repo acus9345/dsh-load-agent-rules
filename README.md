@@ -12,6 +12,18 @@ dsh plugin --profile tui add dsh-load-agent-rules
 
 Use your own profile name in place of `tui`. It starts working in the next session. Remove it with `dsh plugin --profile tui remove dsh-load-agent-rules`.
 
+### From a clone
+
+Before the package is on npm, or to try local changes, build a tarball and install that:
+
+```sh
+git clone https://github.com/acus9345/dsh-load-agent-rules
+cd dsh-load-agent-rules
+npm install
+npm pack
+dsh plugin --profile tui add ./dsh-load-agent-rules-0.1.0.tgz
+```
+
 ## Which files it reads
 
 | Tool | Files |
@@ -79,4 +91,4 @@ npm run test:e2e   # real dsh runs against a scripted local model, no API key ne
 
 The install test runs `dsh plugin add`, which needs `pnpm` on your PATH.
 
-MIT licensed.
+MIT licensed. Written by [acus9345](https://github.com/acus9345). Bug reports and ideas are welcome in the issues.
