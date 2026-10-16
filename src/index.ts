@@ -26,6 +26,7 @@ import { isAbsolute, relative, resolve, sep } from 'node:path'
 import { discoverRules, RULE_SOURCES, type Rule, type RuleSource } from './discover.ts'
 import { renderAttached, renderBaseline } from './render.ts'
 import { matchesAny } from './shared/glob.ts'
+import { resolveConfig } from './shared/live.ts'
 
 declare module '@deepseek-ai/dsh-llm' {
   interface MessageSourceMap {
@@ -65,15 +66,18 @@ export interface Config {
   cacheMs: number
 }
 
+// Fields marked `.volatile()` can be changed live from the settings page on
+// DSH's Plugins page. `toolName` registers a tool once at startup, so it stays
+// an ordinary field that needs a restart.
 export const Config: Schema<Config> = Schema.object({
-  sources: Schema.array(Schema.union([...RULE_SOURCES])).default([...RULE_SOURCES]),
-  maxBaselineBytes: Schema.natural().default(48_000),
-  maxAttachBytes: Schema.natural().default(24_000),
-  maxFileBytes: Schema.natural().default(200_000),
+  sources: Schema.array(Schema.union([...RULE_SOURCES])).default([...RULE_SOURCES]).volatile(),
+  maxBaselineBytes: Schema.natural().default(48_000).volatile(),
+  maxAttachBytes: Schema.natural().default(24_000).volatile(),
+  maxFileBytes: Schema.natural().default(200_000).volatile(),
   toolName: Schema.string().default('project_rule'),
-  touchTools: Schema.array(Schema.string()).default(['read', 'write', 'edit', 'str_replace_editor']),
-  cacheMs: Schema.natural().default(5_000),
-}) as Schema<Config>
+  touchTools: Schema.array(Schema.string()).default(['read', 'write', 'edit', 'str_replace_editor']).volatile(),
+  cacheMs: Schema.natural().default(5_000).volatile(),
+}) as unknown as Schema<Config>
 
 type RulesSource = Extract<UserMessage['source'], { kind: 'load-agent-rules' }>
 
@@ -101,10 +105,13 @@ const baselineDigest = (rules: readonly Rule[]): string =>
 export function apply(ctx: Context, config: Config): void {
   const cache = new Map<string, { at: number; rules: Rule[] }>()
   const rulesFor = (root: string): Rule[] => {
-    const hit = cache.get(root)
-    if (hit !== undefined && Date.now() - hit.at < config.cacheMs) return hit.rules
-    const rules = discoverRules(root, { sources: config.sources, maxFileBytes: config.maxFileBytes })
-    cache.set(root, { at: Date.now(), rules })
+    const cfg = resolveConfig(config)
+    // Sources and size limit are part of the key, so a change on the settings page applies at once.
+    const key = `${root}\0${cfg.sources.join(',')}\0${cfg.maxFileBytes}`
+    const hit = cache.get(key)
+    if (hit !== undefined && Date.now() - hit.at < cfg.cacheMs) return hit.rules
+    const rules = discoverRules(root, { sources: cfg.sources, maxFileBytes: cfg.maxFileBytes })
+    cache.set(key, { at: Date.now(), rules })
     if (cache.size > 50) cache.delete(cache.keys().next().value!)
     return rules
   }
@@ -127,7 +134,7 @@ export function apply(ctx: Context, config: Config): void {
     const digest = baselineDigest(rules)
     const state = visibleState(agent)
     if (state.baseline === digest) return decision
-    const rendered = renderBaseline(rules, config.maxBaselineBytes, config.toolName)
+    const rendered = renderBaseline(rules, resolveConfig(config).maxBaselineBytes, config.toolName)
     if (rendered.text.length === 0) return decision
     const message = createUserMessage({
       content: [{ type: 'text', text: state.baseline === undefined ? rendered.text : `Project rules were updated.\n\n${rendered.text}` }],
@@ -137,10 +144,10 @@ export function apply(ctx: Context, config: Config): void {
     return { ...decision, messages: decision.messages.toSpliced(lastClaimed + 1, 0, message) }
   })
 
-  const touchTools = new Set(config.touchTools)
   ctx.on('tools/post-execute', async (exec: ToolExecution, result: Readonly<ToolExecutionResult>, next: () => Promise<PostToolDecision>) => {
     const decision = await next()
-    if (result.isError || decision.kind !== 'accept' || !touchTools.has(exec.name) || exec.agent === undefined) return decision
+    const cfg = resolveConfig(config)
+    if (result.isError || decision.kind !== 'accept' || !cfg.touchTools.includes(exec.name) || exec.agent === undefined) return decision
     const args = exec.arguments as { file_path?: unknown; path?: unknown } | null
     const raw = typeof args?.file_path === 'string' ? args.file_path : typeof args?.path === 'string' ? args.path : undefined
     if (raw === undefined) return decision
@@ -158,7 +165,7 @@ export function apply(ctx: Context, config: Config): void {
     const pending = attachedThisStep.get(exec.agent) ?? new Set<string>()
     const due = rules.filter(r => r.mode === 'glob' && !visible.has(r.name) && !pending.has(r.name) && matchesAny(rel, r.globs))
     if (due.length === 0) return decision
-    const rendered = renderAttached(due, rel, config.maxAttachBytes, config.toolName)
+    const rendered = renderAttached(due, rel, cfg.maxAttachBytes, config.toolName)
     for (const n of rendered.included) pending.add(n)
     attachedThisStep.set(exec.agent, pending)
     const message = createUserMessage({

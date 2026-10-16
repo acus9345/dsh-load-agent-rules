@@ -66,7 +66,9 @@ Read any of them with the `project_rule` tool when it is relevant to your task:
 
 ## Settings
 
-Add a row like this to `~/.dsh/profiles/<profile>/cordis.patch.yml`, or to `~/.dsh/cordis.patch.yml` for every profile. Keys you leave out keep their defaults.
+The easy way: open **Plugins** in DSH's sidebar, click **dsh-load-agent-rules**, change what you want and press **Save**. It applies to the next tool call, no restart needed (`toolName` is the one setting that still needs a restart, so it is not on the page).
+
+Or add a row like this to `~/.dsh/profiles/<profile>/cordis.patch.yml`, or to `~/.dsh/cordis.patch.yml` for every profile. Keys you leave out keep their defaults.
 
 ```yaml
 - id: load-agent-rules
