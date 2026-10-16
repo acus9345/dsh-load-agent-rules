@@ -1,6 +1,6 @@
 {
   "name": "dsh-load-agent-rules",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "DeepSeek Harness plugin that loads the rule files other coding agents use (Cursor .mdc rules, Copilot instructions, Windsurf, Cline, Kiro, Roo, GEMINI.md) with their glob scoping: always-on rules up front, glob rules when matching files are touched, the rest on request.",
   "license": "MIT",
   "author": "acus9345",
@@ -20,7 +20,6 @@
     "client.js",
     "cordis.patch.yml",
     "README.md",
-    "README.zh.md",
     "LICENSE"
   ],
   "scripts": {
