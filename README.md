@@ -1,5 +1,7 @@
 # dsh-load-agent-rules
 
+English | [中文](README.zh.md)
+
 Lots of repos already have rules for AI agents, just not in a format DeepSeek Harness reads. Someone on the team wrote `.cursor/rules/testing.mdc`, another person added `.github/copilot-instructions.md`, and there's a `.windsurfrules` from that one month everyone tried Windsurf. DSH reads `AGENTS.md` and `CLAUDE.md`, but it ignores the rest. So the agent never hears "we use Vitest, not Jest" or "never edit old migrations", even though it's written down right there in the repo.
 
 This plugin finds those rule files and gives them to the model the way each tool meant them to be used. You don't have to convert or copy anything.
@@ -14,14 +16,14 @@ That's the `web` profile, the browser UI you start with `dsh web`. If you run DS
 
 ### From a clone
 
-Before the package is on npm, or to try local changes, build a tarball and install that:
+To try local changes, build a tarball and install that:
 
 ```sh
 git clone https://github.com/acus9345/dsh-load-agent-rules
 cd dsh-load-agent-rules
 npm install
 npm pack
-dsh plugin --profile web add ./dsh-load-agent-rules-0.1.0.tgz
+dsh plugin --profile web add ./dsh-load-agent-rules-0.2.0.tgz
 ```
 
 ## Which files it reads
