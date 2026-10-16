@@ -1,6 +1,6 @@
 # dsh-load-agent-rules
 
-English | [中文](README.zh.md)
+English | [中文](README_zh.md)
 
 Lots of repos already have rules for AI agents, just not in a format DeepSeek Harness reads. Someone on the team wrote `.cursor/rules/testing.mdc`, another person added `.github/copilot-instructions.md`, and there's a `.windsurfrules` from that one month everyone tried Windsurf. DSH reads `AGENTS.md` and `CLAUDE.md`, but it ignores the rest. So the agent never hears "we use Vitest, not Jest" or "never edit old migrations", even though it's written down right there in the repo.
 
